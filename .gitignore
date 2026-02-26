@@ -15,3 +15,6 @@ local.properties
 # Keep large local models out of VCS by default
 runtime/models/
 runtime/RELEASE_NOTES.txt
+
+# Android CMake intermediate files
+app/.cxx/

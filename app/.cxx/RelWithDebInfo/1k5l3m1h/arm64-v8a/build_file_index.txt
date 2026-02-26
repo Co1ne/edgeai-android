@@ -1,1 +1,0 @@
-D:\AI\EdgeAiVoice\app\src\main\cpp\CMakeLists.txt
