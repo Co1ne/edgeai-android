@@ -1,0 +1,3 @@
+D:/AI/EdgeAiVoice/app/.cxx/Debug/4w6u115g/arm64-v8a/CMakeFiles/native-lib.dir
+D:/AI/EdgeAiVoice/app/.cxx/Debug/4w6u115g/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/AI/EdgeAiVoice/app/.cxx/Debug/4w6u115g/arm64-v8a/CMakeFiles/rebuild_cache.dir

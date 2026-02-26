@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "D:\\AI\\EdgeAiVoice\\app\\src\\main\\cpp\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "D:\\DesaySV\\Environment\\AndroidSDK\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "D:\\AI\\EdgeAiVoice\\app\\.cxx\\RelWithDebInfo\\1k5l3m1h\\arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "D:\\DesaySV\\Environment\\AndroidSDK\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "D:\\AI\\EdgeAiVoice\\app\\.cxx\\RelWithDebInfo\\1k5l3m1h\\arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "native-lib::@6890427a1f51a3e7e1df": {
+      "artifactName": "native-lib",
+      "abi": "arm64-v8a",
+      "output": "D:\\AI\\EdgeAiVoice\\app\\build\\intermediates\\cxx\\RelWithDebInfo\\1k5l3m1h\\obj\\arm64-v8a\\libnative-lib.so",
+      "runtimeFiles": []
+    }
+  }
+}

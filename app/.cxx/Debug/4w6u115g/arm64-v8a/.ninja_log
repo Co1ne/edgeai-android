@@ -1,0 +1,5 @@
+# ninja log v5
+2	2100	7937987084654327	CMakeFiles/native-lib.dir/native-lib.cpp.o	a74199ab1e60e4f4
+2104	2589	7937987088708636	D:/AI/EdgeAiVoice/app/build/intermediates/cxx/Debug/4w6u115g/obj/arm64-v8a/libnative-lib.so	e02e59b0023313ff
+8	1510	7938196242071465	CMakeFiles/native-lib.dir/native-lib.cpp.o	a74199ab1e60e4f4
+1512	2149	7938196248401772	D:/AI/EdgeAiVoice/app/build/intermediates/cxx/Debug/4w6u115g/obj/arm64-v8a/libnative-lib.so	e02e59b0023313ff

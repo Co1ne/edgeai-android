@@ -1,0 +1,17 @@
+﻿# Ignore Gradle project-specific cache directory
+.gradle/
+
+# Ignore local build output directory
+build/
+
+# Ignore Android Studio generated files
+local.properties
+*.iml
+.idea/
+
+# Runtime temp extraction
+.tmp/
+
+# Keep large local models out of VCS by default
+runtime/models/
+runtime/RELEASE_NOTES.txt
