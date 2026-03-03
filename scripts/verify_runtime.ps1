@@ -1,18 +1,18 @@
-﻿$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
+$modelRoot = Join-Path $root "runtime/models"
+$manifest = Join-Path $modelRoot "_manifest/models.json"
 
-$requiredFiles = @(
-  "runtime/models/asr/ggml-base.bin",
-  "runtime/models/llm/model.gguf",
-  "runtime/models/_manifest/models.json"
-)
+if (-not (Test-Path $manifest)) { throw "Missing: $manifest" }
 
-foreach ($f in $requiredFiles) {
-  $p = Join-Path $root $f
-  if (-not (Test-Path $p)) { throw "Missing: $p" }
-  $size = (Get-Item $p).Length
-  if ($size -le 0) { throw "Invalid size: $p" }
-  Write-Output "OK: $f ($size bytes)"
+$modelFiles = Get-ChildItem -Path $modelRoot -Recurse -File | Sort-Object FullName
+if (-not $modelFiles -or $modelFiles.Count -eq 0) { throw "Missing model files in $modelRoot" }
+
+foreach ($f in $modelFiles) {
+  $size = $f.Length
+  if ($size -le 0) { throw "Invalid size: $($f.FullName)" }
+  $rel = $f.FullName.Substring($root.Length + 1)
+  Write-Output "OK: $rel ($size bytes)"
 }
 
 $notes = Join-Path $root "runtime/RELEASE_NOTES.txt"

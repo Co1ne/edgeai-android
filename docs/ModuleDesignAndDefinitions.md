@@ -1,6 +1,6 @@
 ﻿# 端侧语音 AI 关键模块设计与待补定义（v0.1）
 
-更新时间：2026-02-26
+更新时间：2026-03-02
 适用范围：EdgeAiVoice v1（离线优先）
 
 ## 1. 目标与边界
@@ -22,6 +22,11 @@ v1 out-of-scope：
 - 多语言
 - 复杂工具调用
 
+商业级约束（v1）：
+- A 档主力：8GB 机型必须可用
+- B 档增强：12GB+ 提供更高质量模型选项
+- 任何优化不得以稳定性为代价
+
 ## 2. 端到端调用链
 
 ```text
@@ -41,6 +46,17 @@ UI (Compose)
 - IO 线程：模型路径校验、文件读写
 - Audio 线程：录音采集（高优先级）
 - Inference 线程：ASR/LLM 推理
+
+## 2.1 运行时分层（v1 建议冻结）
+
+- Runtime 层：`asr_runtime`（whisper）、`llm_runtime`（llama）、`tts_runtime`（预留）
+- Orchestrator 层：状态机、PromptBuilder、模型路由、工具编排（v1 工具可选）
+- Policy 层：延迟预算、token 预算、内存预算、降级策略
+- Observability 层：TTFT/tok/s/峰值内存/错误码/崩溃归因
+
+分层原则：
+- Runtime 只做推理能力，不承载产品策略
+- 路由与降级统一放在 Orchestrator + Policy，避免 JNI 分叉
 
 ## 3. 状态机定义（必须实现）
 
@@ -245,27 +261,35 @@ v1 模板：
 - `OutOfMemory`
 - `Timeout`
 
-降级顺序：
-1. 降低线程数
-2. 降低 `maxNewTokens`
-3. 降低上下文长度
-4. 引导用户关闭后台应用
+降级触发（建议）：
+1. 连续 2 次 `TTFT > 2s`
+2. `tok/s < 4`（持续低于阈值）
+3. 峰值内存逼近设备阈值（A 档优先保护）
+4. 检测到明显热降频
+
+降级动作顺序（建议）：
+1. 降低 `maxNewTokens`
+2. 降低上下文长度（如 `n_ctx 4096 -> 2048`）
+3. 降低线程数（保留 UI/音频线程余量）
+4. 模型回退（`7B -> 3B`）
+5. 引导用户关闭后台应用
 
 ## 12. 当前工程到目标的差距
 
-已完成（截至 2026-02-26）：
+已完成（截至 2026-03-02，Milestone 2）：
 - Android 工程骨架
 - so 装载顺序与检查
-- 模型外置路径策略（runtime/models + push脚本）
-- 录音权限请求流程
+- 模型外置路径策略（runtime/models + push 脚本）
 - `AudioCaptureEngine`（AudioRecord 16k/mono/PCM16）
-- PTT UI 交互与状态机联动
-- ASR JNI 调用链打通（stub返回）
+- ASR JNI 真实推理链路（whisper）
+- LLM JNI 流式输出链路（llama）
+- 状态机主链路（`Idle -> Recording -> Transcribing -> Thinking -> Streaming -> Done`）
+- 真机验证通过（含 LLM 首 token 与完成事件）
 
-未完成：
-- 真实 whisper ASR 推理实现
-- LLM streaming 与回调接入
-- 会话级 metrics 完整采集
+当前主要缺口（Milestone 3 重点）：
+- 会话级 metrics 完整采集（tok/s、峰值内存、温控信号）
+- 统一错误码与崩溃/OOM 归因闭环
+- A/B 档模型路由与自动降级策略
 
 ## 13. 开发前必须确认的待补定义（建议你确认）
 
@@ -316,9 +340,13 @@ v1 模板：
 - `topP`: `0.9`
 - `maxNewTokens`: `256`
 - `repeatPenalty`: `1.1`
-- `contextSize`: `2048`（默认档）
-- `threads`: `4`（默认）
+- `contextSize`: `2048`（A 档默认，B 档可选 `4096`）
+- `threads`: `max(2, big_cores - 1)`（避免占满 CPU）
 - `stopWords`: `["</s>"]`（后续按模板补充）
+
+模型策略冻结：
+- A 档默认：`Qwen2.5-3B-Instruct-GGUF(Q4_K_M)`
+- B 档可选：`Qwen2.5-7B-Instruct-GGUF(Q4_K_M)`
 
 ### 15.3 超时参数
 
@@ -345,4 +373,3 @@ v1 模板：
 6. 指标先写 logcat
 7. JNI 统一错误码
 8. 保留 `filesDir` fallback
-

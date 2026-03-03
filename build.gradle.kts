@@ -10,10 +10,21 @@ tasks.register("importRuntime") {
     description = "Import runtime libs/models from ../edge-ai-android-runtime-v1.tgz"
 
     doLast {
-        val tgz = rootProject.file("../edge-ai-android-runtime-v1.tgz")
-        if (!tgz.exists()) {
-            throw GradleException("Runtime package not found: ${tgz.absolutePath}")
-        }
+        val runtimeOverride = providers.gradleProperty("runtimeTgzPath").orNull
+            ?: System.getenv("RUNTIME_TGZ")
+        val edgeAiRoot = System.getenv("EDGE_AI_ROOT")
+
+        val candidates = listOfNotNull(
+            runtimeOverride?.let { rootProject.file(it) },
+            rootProject.file("../edge-ai-android-runtime-v1.tgz"),
+            edgeAiRoot?.let { File(it, "edge-ai-android-runtime-v1.tgz") },
+            File(System.getProperty("user.home"), "edge-ai/edge-ai-android-runtime-v1.tgz")
+        )
+
+        val tgz = candidates.firstOrNull { it.exists() && it.isFile }
+            ?: throw GradleException(
+                "Runtime package not found. Tried:\n${candidates.joinToString("\n") { "- ${it.absolutePath}" }}"
+            )
 
         val tmpDir = layout.buildDirectory.dir("tmp/runtimeImport").get().asFile
         if (tmpDir.exists()) {
@@ -27,8 +38,8 @@ tasks.register("importRuntime") {
 
         val mappings = listOf(
             "dist/android/arm64-v8a" to "app/src/main/jniLibs/arm64-v8a",
-            "models/asr/ggml-base.bin" to "runtime/models/asr/ggml-base.bin",
-            "models/llm/model.gguf" to "runtime/models/llm/model.gguf",
+            "models/asr" to "runtime/models/asr",
+            "models/llm" to "runtime/models/llm",
             "models/_manifest/models.json" to "runtime/models/_manifest/models.json",
             "RELEASE_NOTES.txt" to "runtime/RELEASE_NOTES.txt"
         )
